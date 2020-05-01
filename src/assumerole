@@ -23,6 +23,9 @@ set -o nounset                              # Treat unset variables as an error
 function set_configuration(){
 	ROLE=$1
 	COMMIT=$2
+	VAR_AWS_ACCESS_KEY_ID=$3
+	VAR_AWS_SECRET_ACCESS_KEY=$4
+	AWS_CONFIG=$5
 
 	# Criando o diretorio de arquivos de config do AWSCLI
 	mkdir -p ~/.aws/
@@ -52,7 +55,7 @@ cat <<EOF
 $0 command [params]
 
 commands:
-  set -r <arn_role> -c <commit_sha>
+  set -r <arn_role> -c <commit_sha> -a <access_key> -s <secret_key> -p <config_profile>
 
  -h help
 EOF
@@ -68,11 +71,14 @@ fi
 
 VERB=$1
 shift
-while getopts r:c:h OPCAO; do
+while getopts r:c:a:s:p:h OPCAO; do
      case "${OPCAO}" in
         #i) IMAGENAME="${OPTARG}" ;;
         r) ROLE="${OPTARG}" ;;
         c) COMMIT="${OPTARG}" ;;
+        a) VAR_AWS_ACCESS_KEY_ID="${OPTARG}" ;;
+        s) VAR_AWS_SECRET_ACCESS_KEY="${OPTARG}" ;;
+        p) AWS_CONFIG="${OPTARG}" ;;
         h) dispHelp; exit ;;
      esac
 done
@@ -80,7 +86,7 @@ done
 
 case "$VERB" in
   set)
-  set_configuration $ROLE $COMMIT
+  set_configuration $ROLE $COMMIT $VAR_AWS_ACCESS_KEY_ID $VAR_AWS_SECRET_ACCESS_KEY $AWS_CONFIG
   ;;
   *)
   echo "Comando invalido $VERB"
