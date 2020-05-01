@@ -38,15 +38,15 @@ function set_configuration(){
 	aws --profile linear-org configure set aws_access_key_id $VAR_AWS_ACCESS_KEY_ID
 	aws --profile linear-org configure set aws_secret_access_key $VAR_AWS_SECRET_ACCESS_KEY
 
-	# Gerando um STS para a conta do ECR
-	touch keys.json
-
-	aws sts assume-role --role-arn $ROLE --role-session-name sts-${COMMIT} > keys.json
-
-	aws --profile linear-shr configure set aws_access_key_id $(cat ./keys.json | jq .Credentials.AccessKeyId -r)
-	aws --profile linear-shr configure set aws_secret_access_key $(cat ./keys.json | jq .Credentials.SecretAccessKey -r)
-
-	rm ./keys.json
+#	# Gerando um STS para a conta do ECR
+#	touch keys.json
+#
+#	aws sts assume-role --role-arn $ROLE --role-session-name sts-${COMMIT} > keys.json
+#
+#	aws --profile linear-shr configure set aws_access_key_id $(cat ./keys.json | jq .Credentials.AccessKeyId -r)
+#	aws --profile linear-shr configure set aws_secret_access_key $(cat ./keys.json | jq .Credentials.SecretAccessKey -r)
+#
+#	rm ./keys.json
 }
 
 
