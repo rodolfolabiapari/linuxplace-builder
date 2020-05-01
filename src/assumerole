@@ -1,0 +1,85 @@
+#!/bin/bash -x
+#===============================================================================
+#
+#          FILE: assumerole.sh
+#
+#         USAGE: ./assumerole.sh set
+#
+#   DESCRIPTION:  deployer
+#
+#       OPTIONS: ---
+#  REQUIREMENTS: ---
+#          BUGS: ---
+#         NOTES: ---
+#        AUTHOR: Rodolfo, rodolfo.mansur@linuxplace.com.br
+#  ORGANIZATION: Linuxplace
+#       CREATED: 01/05/2020 21:56
+#      REVISION:  ---
+#===============================================================================
+
+set -o nounset                              # Treat unset variables as an error
+
+
+function set_configuration(){
+	ROLE=$1
+	COMMIT=$2
+
+	# Gerando um STS para a conta do ECR
+	touch keys.json
+	aws sts assume-role --role-arn $ROLE --role-session-name sts-${COMMIT} > keys.json
+
+	# Criando o diretorio de arquivos de config do AWSCLI
+	mkdir -p ~/.aws/
+
+	touch ~/.aws/config
+	echo $AWS_CONFIG >> ~/.aws/config
+
+	touch ~/.aws/credentials
+	echo "[default]" >> ~/.aws/credentials
+	echo "aws_access_key_id = $(cat ./keys.json | jq .Credentials.AccessKeyId -r)" >> ~/.aws/credentials
+	echo "aws_secret_access_key = $(cat ./keys.json | jq .Credentials.SecretAccessKey -r)" >> ~/.aws/credentials
+
+	rm ./keys.json
+}
+
+
+function dispHelp(){
+cat <<EOF
+$0 command [params]
+
+commands:
+  set -r <arn_role> -c <commit_sha>
+
+ -h help
+EOF
+
+}
+echo ${*}
+#### comandos
+if [ $# -lt 1 ] ; then
+  dispHelp
+  exit 1
+fi
+
+
+VERB=$1
+shift
+while getopts r:c:h OPCAO; do
+     case "${OPCAO}" in
+        #i) IMAGENAME="${OPTARG}" ;;
+        r) ROLE="${OPTARG}" ;;
+        c) COMMIT="${OPTARG}" ;;
+        h) dispHelp; exit ;;
+     esac
+done
+
+
+case "$VERB" in
+  set)
+  set_configuration $ROLE $COMMIT
+  ;;
+  *)
+  echo "Comando invalido $VERB"
+  exit 1
+  ;;
+esac
