@@ -21,11 +21,10 @@ set -o nounset                              # Treat unset variables as an error
 
 
 function set_configuration(){
-	ROLE=$1
-	COMMIT=$2
-	VAR_AWS_ACCESS_KEY_ID=$3
-	VAR_AWS_SECRET_ACCESS_KEY=$4
-	AWS_CONFIG=$5
+	COMMIT=$1
+	VAR_AWS_ACCESS_KEY_ID=$2
+	VAR_AWS_SECRET_ACCESS_KEY=$3
+	AWS_CONFIG=$4
 
 	# Criando o diretorio de arquivos de config do AWSCLI
 	mkdir -p ~/.aws/
@@ -33,7 +32,7 @@ function set_configuration(){
 	touch ~/.aws/config
 	touch ~/.aws/credentials
 
-	echo $AWS_CONFIG >> ~/.aws/config
+	cat "$AWS_CONFIG" >> ~/.aws/config
 
 	aws --profile linear-org configure set aws_access_key_id $VAR_AWS_ACCESS_KEY_ID
 	aws --profile linear-org configure set aws_secret_access_key $VAR_AWS_SECRET_ACCESS_KEY
@@ -55,7 +54,7 @@ cat <<EOF
 $0 command [params]
 
 commands:
-  set -r <arn_role> -c <commit_sha> -a <access_key> -s <secret_key> -p <config_profile>
+  set -c <commit_sha> -a <access_key> -s <secret_key> -p <config_profile>
 
  -h help
 EOF
@@ -74,7 +73,6 @@ shift
 while getopts r:c:a:s:p:h OPCAO; do
      case "${OPCAO}" in
         #i) IMAGENAME="${OPTARG}" ;;
-        r) ROLE="${OPTARG}" ;;
         c) COMMIT="${OPTARG}" ;;
         a) VAR_AWS_ACCESS_KEY_ID="${OPTARG}" ;;
         s) VAR_AWS_SECRET_ACCESS_KEY="${OPTARG}" ;;
@@ -86,7 +84,7 @@ done
 
 case "$VERB" in
   set)
-  set_configuration $ROLE $COMMIT $VAR_AWS_ACCESS_KEY_ID $VAR_AWS_SECRET_ACCESS_KEY $AWS_CONFIG
+  set_configuration $COMMIT $VAR_AWS_ACCESS_KEY_ID $VAR_AWS_SECRET_ACCESS_KEY $AWS_CONFIG
   ;;
   *)
   echo "Comando invalido $VERB"
